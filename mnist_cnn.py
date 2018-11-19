@@ -19,7 +19,7 @@ import missinglink
 from pathlib import Path
 
 
-batch_size = 512
+batch_size = 256
 num_classes = 10
 epochs = 12
 
@@ -68,19 +68,19 @@ model.compile(
     metrics=['accuracy'],
 )
 
-def get_log_filepath():
-    timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
-    return Path('/tmp/tflogs') / timestamp
+# def get_log_filepath():
+#     timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
+#     return Path('/tmp/tflogs') / timestamp
 
 missinglink_callback = missinglink.KerasCallback()
-tensorboard_callback = TensorBoard(
-    log_dir=get_log_filepath(),
-    histogram_freq=1,
-    batch_size=batch_size,
-    write_graph=True,
-    write_grads=True,
-    write_images=True,
-)
+# tensorboard_callback = TensorBoard(
+#     log_dir=get_log_filepath(),
+#     histogram_freq=1,
+#     batch_size=batch_size,
+#     write_graph=True,
+#     write_grads=True,
+#     write_images=True,
+# )
 
 model.fit(
     x_train,
@@ -89,7 +89,7 @@ model.fit(
     epochs=epochs,
     verbose=1,
     validation_data=(x_test, y_test),
-    callbacks=[tensorboard_callback, missinglink_callback],
+    callbacks=[missinglink_callback],
 )
 
 with missinglink_callback.test(model):
