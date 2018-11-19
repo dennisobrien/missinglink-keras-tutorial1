@@ -16,7 +16,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adadelta, Adam
 from keras import backend as K
 import missinglink
-from pathlib import Path
+# from pathlib import Path
 
 
 batch_size = 256
