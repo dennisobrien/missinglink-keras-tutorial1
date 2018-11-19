@@ -6,17 +6,20 @@ Gets to 99.25% test accuracy after 12 epochs
 '''
 
 from __future__ import print_function
+from datetime import datetime
 import keras
 from keras.callbacks import TensorBoard
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
+from keras.optimizers import Adadelta, Adam
 from keras import backend as K
 import missinglink
+from pathlib import Path
 
 
-batch_size = 128
+batch_size = 512
 num_classes = 10
 epochs = 12
 
@@ -61,13 +64,17 @@ model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(
     loss=keras.losses.categorical_crossentropy,
-    optimizer=keras.optimizers.Adadelta(),
+    optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False),
     metrics=['accuracy'],
 )
 
+def get_log_filepath():
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
+    return Path('/tmp/tflogs') / timestamp
+
 missinglink_callback = missinglink.KerasCallback()
-tensorboard_callback = keras.callbacks.TensorBoard(
-    log_dir='/tmp/tflogs',
+tensorboard_callback = TensorBoard(
+    log_dir=get_log_filepath(),
     histogram_freq=1,
     batch_size=batch_size,
     write_graph=True,
