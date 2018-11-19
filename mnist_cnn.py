@@ -7,11 +7,14 @@ Gets to 99.25% test accuracy after 12 epochs
 
 from __future__ import print_function
 import keras
+from keras.callbacks import TensorBoard
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+import missinglink
+
 
 batch_size = 128
 num_classes = 10
@@ -56,15 +59,34 @@ model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
-              metrics=['accuracy'])
+model.compile(
+    loss=keras.losses.categorical_crossentropy,
+    optimizer=keras.optimizers.Adadelta(),
+    metrics=['accuracy'],
+)
 
-model.fit(x_train, y_train,
-          batch_size=batch_size,
-          epochs=epochs,
-          verbose=1,
-          validation_data=(x_test, y_test))
-score = model.evaluate(x_test, y_test, verbose=0)
+missinglink_callback = missinglink.KerasCallback()
+tensorboard_callback = keras.callbacks.TensorBoard(
+    log_dir='/tmp/tflogs',
+    histogram_freq=1,
+    batch_size=batch_size,
+    write_graph=True,
+    write_grads=True,
+    write_images=True,
+)
+
+model.fit(
+    x_train,
+    y_train,
+    batch_size=batch_size,
+    epochs=epochs,
+    verbose=1,
+    validation_data=(x_test, y_test),
+    callbacks=[tensorboard_callback, missinglink_callback],
+)
+
+with missinglink_callback.test(model):
+    score = model.evaluate(x_test, y_test, verbose=0)
+
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
